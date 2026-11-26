@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Weather & Cryptography Dashboard</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+<header>
+    <h1>Real-Time Dashboard</h1>
+    <p>Weather Monitoring & Cryptography System</p>
+</header>
+
+<nav>
+    <button onclick="showSection('weather')">Weather Dashboard</button>
+    <button onclick="showSection('crypto')">Cryptography</button>
+</nav>
+
+<main>
+
+    <!-- WEATHER SECTION -->
+
+    <section id="weather">
+
+        <h2>Live Weather Information</h2>
+
+        <div class="search">
+            <input
+                type="text"
+                id="city"
+                placeholder="Enter city name"
+            >
+
+            <button onclick="getWeather()">Search</button>
+        </div>
+
+        <p id="weatherStatus" role="status"></p>
+
+        <div class="weather-card">
+
+            <h2 id="location">City Name</h2>
+
+            <img id="weatherIcon" alt="Weather icon">
+
+            <h1 id="temperature">-- °C</h1>
+
+            <p id="description">Weather condition</p>
+
+            <div class="weather-details">
+
+                <div>
+                    <h3>Humidity</h3>
+                    <p id="humidity">--%</p>
+                </div>
+
+                <div>
+                    <h3>Wind Speed</h3>
+                    <p id="wind">-- m/s</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- CRYPTOGRAPHY SECTION -->
+
+    <section id="crypto" class="hidden">
+
+        <h2>Cryptography System</h2>
+
+        <label>Encryption Key</label>
+
+        <input
+            type="text"
+            id="key"
+            placeholder="Generate or paste your key"
+        >
+
+        <button onclick="generateKey()">Generate Key</button>
+
+        <label>Enter Your Message</label>
+
+        <textarea
+            id="message"
+            placeholder="Enter message here..."
+        ></textarea>
+
+        <div class="crypto-buttons">
+
+            <button onclick="encryptMessage()">Encrypt</button>
+
+            <button onclick="decryptMessage()">Decrypt</button>
+
+        </div>
+
+        <h3>Result</h3>
+
+        <textarea
+            id="result"
+            readonly
+            placeholder="Your result appears here..."
+        ></textarea>
+
+        <button onclick="copyResult()">Copy Result</button>
+
+        <p id="cryptoStatus" role="status"></p>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>Real-Time Weather & Cryptography Dashboard | Python Flask</p>
+</footer>
+
+<script src="/static/script.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,162 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #101827;
+    color: white;
+    min-height: 100vh;
+}
+
+header {
+    text-align: center;
+    padding: 30px;
+    background: linear-gradient(120deg, #075985, #312e81);
+}
+
+header h1 {
+    margin-bottom: 10px;
+    font-size: 30px;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 20px;
+    flex-wrap: wrap;
+}
+
+button {
+    background: #0891b2;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 15px;
+    margin: 5px;
+}
+
+button:hover {
+    background: #0e7490;
+}
+
+main {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+section {
+    background: #1e293b;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
+
+section h2 {
+    margin-bottom: 20px;
+    color: #38bdf8;
+}
+
+.hidden {
+    display: none;
+}
+
+.search {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #475569;
+    border-radius: 7px;
+    background: #0f172a;
+    color: white;
+    margin: 10px 0 15px;
+    font-size: 15px;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.weather-card {
+    text-align: center;
+    background: linear-gradient(135deg, #0369a1, #4338ca);
+    padding: 30px;
+    border-radius: 12px;
+}
+
+.weather-card img {
+    width: 90px;
+    height: 90px;
+}
+
+.weather-card h1 {
+    font-size: 45px;
+    margin: 10px;
+}
+
+.weather-details {
+    display: flex;
+    justify-content: space-around;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.weather-details div {
+    background: rgba(255,255,255,0.15);
+    padding: 20px;
+    border-radius: 10px;
+    flex: 1;
+}
+
+.weather-details h3 {
+    margin-bottom: 10px;
+}
+
+.crypto-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+#weatherStatus, #cryptoStatus {
+    color: #facc15;
+    margin: 10px 0;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #0f172a;
+    margin-top: 30px;
+}
+
+@media (max-width: 600px) {
+    main {
+        padding: 12px;
+    }
+
+    .search {
+        flex-direction: column;
+    }
+
+    .weather-details {
+        flex-direction: column;
+    }
+
+    header h1 {
+        font-size: 23px;
+    }
+}
+

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-Time Dashboard | Weather & Cryptography</title>
+  <style>
+    :root {
+      --bg: #f3f7fc;
+      --surface: #ffffff;
+      --text: #172033;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --border: #dbe4f0;
+      --soft: #eaf2ff;
+      --shadow: 0 12px 35px rgba(30, 64, 120, .09);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: linear-gradient(135deg, #eaf2ff, #f8fbff 55%, #eef8ff);
+      min-height: 100vh;
+    }
+    .container { width: min(1100px, 92%); margin: 32px auto 50px; }
+    header {
+      padding: 30px;
+      color: white;
+      border-radius: 22px;
+      background: linear-gradient(120deg, #123b78, #2563eb 65%, #38a3e8);
+      box-shadow: var(--shadow);
+    }
+    header h1 { margin: 0 0 10px; font-size: clamp(28px, 4vw, 40px); }
+    header p { margin: 0; color: #e3efff; font-size: 16px; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 12px; margin: 22px 0; }
+    .tab {
+      border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px;
+      font-weight: 700; cursor: pointer; background: var(--surface); color: var(--text);
+    }
+    .tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+      padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px;
+    }
+    h2 { margin: 0 0 18px; font-size: 25px; }
+    h3 { margin: 0 0 10px; }
+    .search-row { display: flex; gap: 10px; max-width: 650px; }
+    input, textarea, select {
+      width: 100%; padding: 13px 14px; border: 1px solid #cbd5e1; border-radius: 10px;
+      font: inherit; color: var(--text); background: white; outline: none;
+    }
+    input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px #2563eb20; }
+    button.action {
+      border: 0; border-radius: 10px; padding: 12px 18px; background: var(--primary);
+      color: white; font: inherit; font-weight: 700; cursor: pointer; white-space: nowrap;
+    }
+    button.action:hover { background: var(--primary-dark); }
+    button.secondary { background: #e8eef8; color: #1e3a5f; }
+    button.secondary:hover { background: #d9e5f6; }
+    .weather-top {
+      display: flex; justify-content: space-between; align-items: center; gap: 18px;
+      flex-wrap: wrap; margin-top: 24px; padding: 22px; border-radius: 15px;
+      background: linear-gradient(120deg, #eff6ff, #f5fbff);
+    }
+    .city { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+    .temperature { font-size: 54px; font-weight: 800; color: #174ea6; }
+    .weather-icon { font-size: 58px; }
+    .weather-condition { color: var(--muted); font-weight: 600; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
+    .metric { background: #f8fafc; border: 1px solid var(--border); border-radius: 13px; padding: 17px; }
+    .metric span { display: block; color: var(--muted); font-size: 14px; margin-bottom: 8px; }
+    .metric strong { font-size: 22px; }
+    .message { margin-top: 14px; color: var(--muted); min-height: 20px; }
+    .error { color: #b91c1c; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field { margin-bottom: 16px; }
+    label { display: block; font-weight: 700; margin-bottom: 8px; }
+    textarea { min-height: 130px; resize: vertical; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .note { color: var(--muted); font-size: 14px; line-height: 1.55; }
+    footer { text-align: center; color: var(--muted); padding: 12px; font-size: 13px; }
+    @media (max-width: 650px) {
+      .container { margin-top: 16px; }
+      header, .card { padding: 20px; }
+      .search-row { flex-direction: column; }
+      .search-row button { width: 100%; }
+      .metrics, .form-grid { grid-template-columns: 1fr; }
+      .temperature { font-size: 44px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Real-Time Dashboard</h1>
+      <p>Weather Monitoring &amp; Cryptography System</p>
+    </header>
+
+    <nav class="tabs" aria-label="Dashboard sections">
+      <button class="tab active" data-target="weatherPanel">Weather Dashboard</button>
+      <button class="tab" data-target="cryptoPanel">Cryptography</button>
+    </nav>
+
+    <section id="weatherPanel" class="panel active">
+      <div class="card">
+        <h2>Live Weather Information</h2>
+        <div class="search-row">
+          <input id="cityInput" type="text" placeholder="Enter city name (e.g. Hyderabad)" aria-label="City name">
+          <button class="action" id="searchWeather">Search</button>
+        </div>
+        <div id="weatherMessage" class="message" role="status">Enter a city name to view its current weather.</div>
+
+        <div class="weather-top">
+          <div>
+            <div class="city" id="cityName">City Name</div>
+            <div class="temperature" id="temperature">-- °C</div>
+            <div class="weather-condition" id="condition">Weather condition</div>
+          </div>
+          <div class="weather-icon" id="weatherIcon" aria-label="Weather icon">🌤️</div>
+        </div>
+
+        <div class="metrics">
+          <div class="metric"><span>Humidity</span><strong id="humidity">--%</strong></div>
+          <div class="metric"><span>Wind Speed</span><strong id="windSpeed">-- km/h</strong></div>
+          <div class="metric"><span>Feels Like</span><strong id="feelsLike">-- °C</strong></div>
+        </div>
+        <p class="note">Weather data is retrieved from Open-Meteo. An API key is not required. Internet access is needed.</p>
+      </div>
+    </section>
+
+    <section id="cryptoPanel" class="panel">
+      <div class="card">
+        <h2>Cryptography System</h2>
+        <p class="note">Encrypt a message with a password, or decrypt text that was encrypted by this page using the same password. Encryption uses AES-GCM with a password-derived key.</p>
+        <div class="field">
+          <label for="plainText">Enter your message</label>
+          <textarea id="plainText" placeholder="Type your message here..."></textarea>
+        </div>
+        <div class="field">
+          <label for="cryptoPassword">Password</label>
+          <input id="cryptoPassword" type="password" placeholder="Enter a password">
+        </div>
+        <div class="button-row">
+          <button class="action" id="encryptBtn">Encrypt</button>
+          <button class="action secondary" id="decryptBtn">Decrypt</button>
+          <button class="action secondary" id="clearBtn">Clear</button>
+        </div>
+        <div class="field" style="margin-top:20px">
+          <label for="cryptoOutput">Result</label>
+          <textarea id="cryptoOutput" placeholder="Encrypted or decrypted result will appear here..." readonly></textarea>
+          <div class="button-row">
+            <button class="action secondary" id="copyBtn">Copy Result</button>
+          </div>
+        </div>
+        <div id="cryptoMessage" class="message" role="status"></div>
+      </div>
+    </section>
+
+    <footer>Real-Time Dashboard • Weather Monitoring &amp; Cryptography</footer>
+  </main>
+
+  <script>
+    // Switch between the Weather and Cryptography sections.
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(item => item.classList.remove("active"));
+        document.querySelectorAll(".panel").forEach(panel => panel.classList.remove("active"));
+        tab.classList.add("active");
+        document.getElementById(tab.dataset.target).classList.add("active");
+      });
+    });
+
+    const weatherCodes = {
+      0: ["Clear sky", "☀️"], 1: ["Mainly clear", "🌤️"], 2: ["Partly cloudy", "⛅"],
+      3: ["Overcast", "☁️"], 45: ["Fog", "🌫️"], 48: ["Depositing rime fog", "🌫️"],
+      51: ["Light drizzle", "🌦️"], 53: ["Moderate drizzle", "🌦️"], 55: ["Dense drizzle", "🌧️"],
+      56: ["Light freezing drizzle", "🌧️"], 57: ["Dense freezing drizzle", "🌧️"],
+      61: ["Slight rain", "🌦️"], 63: ["Moderate rain", "🌧️"], 65: ["Heavy rain", "🌧️"],
+      66: ["Light freezing rain", "🌧️"], 67: ["Heavy freezing rain", "🌧️"],
+      71: ["Slight snow", "🌨️"], 73: ["Moderate snow", "❄️"], 75: ["Heavy snow", "❄️"],
+      77: ["Snow grains", "🌨️"], 80: ["Rain showers", "🌦️"], 81: ["Moderate rain showers", "🌧️"],
+      82: ["Violent rain showers", "⛈️"], 85: ["Snow showers", "🌨️"], 86: ["Heavy snow showers", "❄️"],
+      95: ["Thunderstorm", "⛈️"], 96: ["Thunderstorm with hail", "⛈️"], 99: ["Thunderstorm with heavy hail", "⛈️"]
+    };
+
+    async function getWeather() {
+      const city = document.getElementById("cityInput").value.trim();
+      const message = document.getElementById("weatherMessage");
+      if (!city) {
+        message.textContent = "Please enter a city name.";
+        message.className = "message error";
+        return;
+      }
+
+      message.textContent = "Loading weather...";
+      message.className = "message";
+
+      try {
+        const geoResponse = await fetch(
+          "https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(city) + "&count=1&language=en&format=json"
+        );
+        if (!geoResponse.ok) throw new Error("Could not contact the location service.");
+        const geoData = await geoResponse.json();
+        if (!geoData.results || geoData.results.length === 0) {
+          throw new Error("City not found. Check the spelling and try again.");
+        }
+
+        const place = geoData.results[0];
+        const weatherUrl = "https://api.open-meteo.com/v1/forecast?latitude=" +
+          place.latitude + "&longitude=" + place.longitude +
+          "&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto";
+        const weatherResponse = await fetch(weatherUrl);
+        if (!weatherResponse.ok) throw new Error("Could not retrieve weather data.");
+        const weatherData = await weatherResponse.json();
+        const current = weatherData.current;
+        const description = weatherCodes[current.weather_code] || ["Weather information unavailable", "🌡️"];
+
+        document.getElementById("cityName").textContent =
+          [place.name, place.admin1, place.country].filter(Boolean).join(", ");
+        document.getElementById("temperature").textContent = Math.round(current.temperature_2m) + " °C";
+        document.getElementById("condition").textContent = description[0];
+        document.getElementById("weatherIcon").textContent = description[1];
+        document.getElementById("humidity").textContent = current.relative_humidity_2m + "%";
+        document.getElementById("windSpeed").textContent = current.wind_speed_10m + " km/h";
+        document.getElementById("feelsLike").textContent = Math.round(current.apparent_temperature) + " °C";
+        message.textContent = "Last updated: " + new Date(current.time).toLocaleString();
+        message.className = "message";
+      } catch (error) {
+        message.textContent = error.message + " Make sure you are connected to the internet.";
+        message.className = "message error";
+      }
+    }
+
+    document.getElementById("searchWeather").addEventListener("click", getWeather);
+    document.getElementById("cityInput").addEventListener("keydown", event => {
+      if (event.key === "Enter") getWeather();
+    });
+
+    // AES-GCM encryption helpers. The encrypted output format is:
+    // RTD1:<base64 salt>:<base64 IV>:<base64 ciphertext>
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+
+    function toBase64(bytes) {
+      let binary = "";
+      bytes.forEach(byte => binary += String.fromCharCode(byte));
+      return btoa(binary);
+    }
+    function fromBase64(value) {
+      const binary = atob(value);
+      return Uint8Array.from(binary, char => char.charCodeAt(0));
+    }
+    async function deriveKey(password, salt) {
+      const passwordKey = await crypto.subtle.importKey(
+        "raw", encoder.encode(password), "PBKDF2", false, ["deriveKey"]
+      );
+      return crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt, iterations: 200000, hash: "SHA-256" },
+        passwordKey,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+      );
+    }
+
+    document.getElementById("encryptBtn").addEventListener("click", async () => {
+      const message = document.getElementById("plainText").value;
+      const password = document.getElementById("cryptoPassword").value;
+      const status = document.getElementById("cryptoMessage");
+      if (!message || !password) {
+        status.textContent = "Enter both a message and a password.";
+        status.className = "message error";
+        return;
+      }
+      try {
+        if (!crypto.subtle) throw new Error("Secure encryption requires a secure browser context. Use localhost or HTTPS.");
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const key = await deriveKey(password, salt);
+        const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoder.encode(message));
+        const result = "RTD1:" + toBase64(salt) + ":" + toBase64(iv) + ":" +
+          toBase64(new Uint8Array(encrypted));
+        document.getElementById("cryptoOutput").value = result;
+        status.textContent = "Message encrypted successfully.";
+        status.className = "message";
+      } catch (error) {
+        status.textContent = error.message;
+        status.className = "message error";
+      }
+    });
+
+    document.getElementById("decryptBtn").addEventListener("click", async () => {
+      const input = document.getElementById("plainText").value.trim();
+      const password = document.getElementById("cryptoPassword").value;
+      const status = document.getElementById("cryptoMessage");
+      if (!input || !password) {
+        status.textContent = "Paste the encrypted result into the message box and enter the same password.";
+        status.className = "message error";
+        return;
+      }
+      try {
+        if (!crypto.subtle) throw new Error("Secure decryption requires a secure browser context. Use localhost or HTTPS.");
+        const parts = input.split(":");
+        if (parts.length !== 4 || parts[0] !== "RTD1") {
+          throw new Error("Invalid format. Paste the complete RTD1 encrypted result into the message box.");
+        }
+        const salt = fromBase64(parts[1]);
+        const iv = fromBase64(parts[2]);
+        const ciphertext = fromBase64(parts[3]);
+        const key = await deriveKey(password, salt);
+        const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
+        document.getElementById("cryptoOutput").value = decoder.decode(decrypted);
+        status.textContent = "Message decrypted successfully.";
+        status.className = "message";
+      } catch (error) {
+        status.textContent = "Decryption failed. Check the encrypted text and password.";
+        status.className = "message error";
+      }
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      document.getElementById("plainText").value = "";
+      document.getElementById("cryptoPassword").value = "";
+      document.getElementById("cryptoOutput").value = "";
+      document.getElementById("cryptoMessage").textContent = "";
+    });
+
+    document.getElementById("copyBtn").addEventListener("click", async () => {
+      const output = document.getElementById("cryptoOutput");
+      const status = document.getElementById("cryptoMessage");
+      if (!output.value) {
+        status.textContent = "There is no result to copy.";
+        status.className = "message error";
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(output.value);
+        status.textContent = "Result copied to clipboard.";
+        status.className = "message";
+      } catch {
+        output.select();
+        status.textContent = "Select the result and copy it using Ctrl+C.";
+        status.className = "message";
+      }
+    });
+  </script>
+</body>
+</html>
